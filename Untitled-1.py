@@ -4,7 +4,7 @@ import sys
 import math
 import os
 
-# ---------------- INIT ----------------
+# Init
 pygame.init()
 WIDTH, HEIGHT = 800, 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -12,16 +12,16 @@ pygame.display.set_caption("Zombie Shooter 2D - Animated Edition")
 CLOCK = pygame.time.Clock()
 FONT = pygame.font.SysFont("Arial", 26, bold=True)
 
-# ---------------- SETTINGS ----------------
-PLAYER_SPEED = 5
-BULLET_SPEED = 12
+# Inställning/ Kan ändras
+PLAYER_SPEED = 4
+BULLET_SPEED = 13
 ZOMBIE_SPEED = 2
 ZOMBIE_SIZE = (60, 60)
 PLAYER_SIZE = (60, 60)
 BULLET_SIZE = (10, 10)
 HIGHSCORE_FILE = "highscore.txt"
 
-# ---------------- LOAD ASSETS ----------------
+# Ladda ssets
 def load_animation_frames(folder, prefix, count, size):
     frames = []
     for i in range(count):
@@ -32,11 +32,10 @@ def load_animation_frames(folder, prefix, count, size):
             img = pygame.transform.scale(img, size)
             frames.append(img)
         except:
-            print(f"⚠️ Kunde inte hitta: {path}")
+            print(f"Kunde inte hitta: {path}")
     return frames
 
-# Laddar in alla 17 frames för "move" animationen
-# Se till att mappen heter 'tds_zombie' och ligger i samma mapp som scriptet
+# Laddar in alla 17 frames för mina move animationer från min folder med alla bilder.
 ZOMBIE_WALK_FRAMES = load_animation_frames("tds_zombie", "skeleton-move", 17, ZOMBIE_SIZE)
 
 # Fallback om bilder saknas
@@ -45,7 +44,7 @@ if not ZOMBIE_WALK_FRAMES:
     dummy.fill((255, 0, 0))
     ZOMBIE_WALK_FRAMES = [dummy]
 
-# Ladda spelare och kula (byt ut filnamn om du har nya bilder)
+# Ladda spelare och kula med bilderna jag har
 try:
     player_img = pygame.image.load("player.png").convert_alpha()
     player_img = pygame.transform.scale(player_img, PLAYER_SIZE)
@@ -55,7 +54,7 @@ except:
     player_img = pygame.Surface(PLAYER_SIZE); player_img.fill((0, 255, 0))
     bullet_img = pygame.Surface(BULLET_SIZE); bullet_img.fill((255, 255, 0))
 
-# ---------------- FUNCTIONS ----------------
+# Funtkioner
 def load_highscore():
     try:
         with open(HIGHSCORE_FILE, "r") as f: return int(f.read())
@@ -73,14 +72,14 @@ def spawn_zombie():
     elif side == "left":  pos = [-w, random.randint(0, HEIGHT-h)]
     else:                pos = [WIDTH+w, random.randint(0, HEIGHT-h)]
     
-    # Returnerar en zombie-dict
+    # Returnerar en zombie dict
     return {
         "rect": pygame.Rect(pos[0], pos[1], w, h),
         "frame": 0.0,
         "angle": 0
     }
 
-# ---------------- GAME LOOP ----------------
+# Spel Loop
 def game():
     player_rect = pygame.Rect(WIDTH//2, HEIGHT//2, *PLAYER_SIZE)
     bullets = []
@@ -89,7 +88,7 @@ def game():
     high_score = load_highscore()
 
     while True:
-        SCREEN.fill((40, 40, 40)) # Bakgrundsfärg
+        SCREEN.fill((40, 40, 40)) # Bakgrundsfärg, onödig nu
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
@@ -97,7 +96,7 @@ def game():
                 if event.key == pygame.K_SPACE:
                     bullets.append(pygame.Rect(player_rect.centerx-5, player_rect.centery-5, *BULLET_SIZE))
 
-        # RÖRELSE SPELARE
+        # Spelare Rörelse
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]: player_rect.x -= PLAYER_SPEED
         if keys[pygame.K_d]: player_rect.x += PLAYER_SPEED
@@ -105,16 +104,16 @@ def game():
         if keys[pygame.K_s]: player_rect.y += PLAYER_SPEED
         player_rect.clamp_ip(SCREEN.get_rect())
 
-        # SPAWN ZOMBIES
+        # Spawna zombies
         if random.randint(1, 50) == 1:
             zombies.append(spawn_zombie())
 
-        # KULOR
+        # Kulor
         for b in bullets[:]:
             b.y -= BULLET_SPEED
             if b.bottom < 0: bullets.remove(b)
 
-        # ZOMBIE LOGIK
+        # Zombie Logik
         for z in zombies[:]:
             # Flytta mot spelaren
             dx, dy = player_rect.x - z["rect"].x, player_rect.y - z["rect"].y
@@ -144,7 +143,7 @@ def game():
                     score += 1
                     break
 
-        # RITA UT ALLT
+        
         # Rita kulor
         for b in bullets:
             SCREEN.blit(bullet_img, b)
